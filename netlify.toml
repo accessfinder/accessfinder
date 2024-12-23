@@ -1,0 +1,6 @@
+[context.branch-deploy]
+    command = "npm run build:dev"
+
+[context.production]
+    command = "npm run build:prod"
+

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:dev": "cp src/app/dev.robots.ts src/app/robots.ts && rm src/app/dev.robots.ts && next build",
+    "build:prod": "rm src/app/dev.robots.ts && next build"
   },
   "dependencies": {
     "next": "15.1.2",

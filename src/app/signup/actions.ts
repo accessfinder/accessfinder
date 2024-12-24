@@ -12,8 +12,8 @@ export async function signup(formData: FormData) {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
     options: {
-      redirectTo: process.env.DEPLOY_PRIME_URL,
-      emailRedirectTo: process.env.DEPLOY_PRIME_URL,
+      redirectTo: process.env.SITE_URL,
+      emailRedirectTo: process.env.SITE_URL,
     },
   };
 
@@ -25,5 +25,5 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/?" + process.env.DEPLOY_PRIME_URL);
+  redirect("/?" + process.env.SITE_URL);
 }

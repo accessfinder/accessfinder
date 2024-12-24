@@ -10,7 +10,7 @@ export async function signup(formData: FormData) {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
     options: {
-      emailRedirectTo: "https://example.com/welcome",
+      emailRedirectTo: `https://${process.env.URL}/`,
     },
   };
 

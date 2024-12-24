@@ -16,7 +16,12 @@ export async function GET(request: NextRequest) {
       token_hash,
     });
     if (!error) {
-      redirect("/");
+      if (type === "signup") {
+        redirect("/");
+      }
+      if (type === "recovery") {
+        redirect("/reset");
+      }
     }
   }
 

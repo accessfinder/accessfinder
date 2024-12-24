@@ -7,10 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "style": "prettier --write .",
+    "db:start": "supabase start",
     "build:dev": "cp src/app/dev.robots.ts src/app/robots.ts && rm src/app/dev.robots.ts && next build",
     "build:prod": "rm src/app/dev.robots.ts && next build"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.47.10",
     "next": "15.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -20,10 +24,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.30.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.2",
     "postcss": "^8",
     "prettier": "^3.4.2",
+    "supabase": "^2.1.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

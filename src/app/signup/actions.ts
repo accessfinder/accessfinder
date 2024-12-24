@@ -1,4 +1,5 @@
 "use server";
+import 'dotenv/config'
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -11,8 +12,8 @@ export async function signup(formData: FormData) {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
     options: {
-      redirectTo: "https://dev.accessfinder.org",
-      emailRedirectTo: "https://dev.accessfinder.org",
+      redirectTo: process.env.DEPLOY_PRIME_URL,
+      emailRedirectTo: process.env.DEPLOY_PRIME_URL,
     },
   };
 
@@ -24,5 +25,5 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/?" + process.env.DEPLOY_PRIME_URL);
 }

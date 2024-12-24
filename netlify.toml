@@ -1,9 +1,9 @@
 [context.branch-deploy]
-    command = "export SITE_URL=$DEPLOY_PRIME_URL && npm run build:dev"
+    command = "npm run build:dev"
 
 [context.production]
     command = "npm run build:prod"
 
 [context.deploy-preview]
-    command = "export SITE_URL=$DEPLOY_PRIME_URL && npm run build:dev"
+    command = "npm run build:dev"
 

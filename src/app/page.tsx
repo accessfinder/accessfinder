@@ -1,7 +1,7 @@
 export default function Home() {
   return (
-    <div>
-      <p>hello</p>
+    <div className="text-center">
+      <p>Welcome to Access Finder!</p>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import ModeToggle from "@/components/mode-toggle";
 import TopBar from "@/components/top-bar";
-
+import BottomBar from "@/components/bottom-bar";
 export const metadata: Metadata = {
   title: "Access Finder",
   description: "Access Finder",
@@ -38,7 +38,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TopBar />
-          <div className="container mx-auto my-4">{children}</div>
+          <div className="container mx-auto my-4 min-h-[50vh]">{children}</div>
+          <BottomBar />
           <ModeToggle />
         </ThemeProvider>
       </body>

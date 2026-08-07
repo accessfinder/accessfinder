@@ -18,7 +18,7 @@ A platform designed by and for people with disabilities to find and rate accessi
 
 ## Beta Access
 
-The open beta is available at **https://beta.accuguide.org**. If you already have a production account, use those same credentials to log in. The beta includes features and improvements not yet released to production.
+The open beta is available at **https://beta.accuguide.org**. If you already have an account on our main website, use those credentials to log in. The beta includes features and improvements not yet released to production.
 
 ## Tech Stack
 

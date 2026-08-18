@@ -8,19 +8,31 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const query = searchParams.get('query') || ''
-    const latitude = searchParams.get('latitude')
-    const longitude = searchParams.get('longitude')
+
+    const rawLatitude = searchParams.get('latitude')
+    const rawLongitude = searchParams.get('longitude')
+
+    const hasLocation =
+      rawLatitude !== null &&
+      rawLongitude !== null &&
+      rawLatitude !== '' &&
+      rawLongitude !== '' &&
+      !Number.isNaN(Number(rawLatitude)) &&
+      !Number.isNaN(Number(rawLongitude))
+
+    const latitude = hasLocation ? Number(rawLatitude) : null
+    const longitude = hasLocation ? Number(rawLongitude) : null
+
     const apiKey = process.env.BACKEND_GOOGLE_MAPS_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: 'API key not found' }, { status: 500 })
     }
 
-    // Build URL with optional location parameters
+    // Google request stays the same
     let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${apiKey}`
 
-    // Only add location and radius if both latitude and longitude are provided
-    if (latitude && longitude) {
-      url += `&location=${encodeURIComponent(latitude)},${encodeURIComponent(longitude)}&radius=5000`
+    if (latitude !== null && longitude !== null) {
+      url += `&location=${encodeURIComponent(latitude.toString())},${encodeURIComponent(longitude.toString())}&radius=5000`
     }
 
     const response = await fetch(url)
@@ -48,21 +60,50 @@ export async function GET(request: NextRequest) {
     const formattedQuery = query.replace(/\s+/g, ' & ') + ':*'
     let formattedDbResponse: SearchDisplayType[] = []
     const dbCount = await db.select({ count: count() }).from(entityTable)
+
     if (dbCount[0].count !== 0) {
-      const searchDbQuery = sql`(
+      const textSearch = sql`(
         setweight(to_tsvector('english', ${entityTable.name}), 'A') ||
         setweight(to_tsvector('english', ${entityTable.city}), 'A') ||
         setweight(to_tsvector('english', ${entityTable.state || ''}), 'A') ||
         setweight(to_tsvector('english', ${entityTable.displayType}), 'A') ||
         setweight(to_tsvector('english', ${entityTable.type}), 'B') ||
         setweight(to_tsvector('english', ${entityTable.description || ''}), 'B')
-
         @@ to_tsquery('english', ${formattedQuery})
       )`
+
+      const locationFilter =
+        latitude !== null && longitude !== null
+          ? sql`(
+              6371 * acos(
+                LEAST(
+                  1,
+                  cos(radians(${latitude})) *
+                  cos(radians(CAST(${entityTable.lat} AS double precision))) *
+                  cos(radians(CAST(${entityTable.lon} AS double precision)) - radians(${longitude})) +
+                  sin(radians(${latitude})) *
+                  sin(radians(CAST(${entityTable.lat} AS double precision)))
+                )
+              ) <= 5
+            )`
+          : sql`TRUE`
+
       const dbResponse = await db
         .select()
         .from(entityTable)
-        .where(searchDbQuery)
+        .where(sql`${textSearch} AND ${locationFilter}`)
+        .orderBy(
+          sql`6371 * acos(
+            LEAST(
+              1,
+              cos(radians(${latitude ?? 0})) *
+              cos(radians(CAST(${entityTable.lat} AS double precision))) *
+              cos(radians(CAST(${entityTable.lon} AS double precision)) - radians(${longitude ?? 0})) +
+              sin(radians(${latitude ?? 0})) *
+              sin(radians(CAST(${entityTable.lat} AS double precision)))
+            )
+          ) ASC`,
+        )
 
       formattedDbResponse = dbResponse.map((place) => ({
         id: place.id,
@@ -80,16 +121,12 @@ export async function GET(request: NextRequest) {
     const filteredGoogleResponse = formattedGoogleResponse.filter(
       (place) => !dbIds.has(place.googleId),
     )
+
     const combinedResponse = [
-      {
-        loc: 'database',
-        data: formattedDbResponse,
-      },
-      {
-        loc: 'google',
-        data: filteredGoogleResponse,
-      },
+      { loc: 'database', data: formattedDbResponse },
+      { loc: 'google', data: filteredGoogleResponse },
     ]
+
     return NextResponse.json(combinedResponse, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error: `[api/search GET] error: ${error}` })
